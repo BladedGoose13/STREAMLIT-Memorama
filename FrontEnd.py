@@ -4,8 +4,8 @@ from pathlib import Path
 from random import shuffle
 
 # Rutas 
-IMAGE_PATH = Path(r"C:\Users\Blade\Desktop\SKKU\Poker_Card.png")           # reverso
-CARDS_PATH = Path(r"C:\Users\Blade\Desktop\SKKU")                           # caras
+IMAGE_PATH = Path("Poker_Card.png")           # reverso
+CARDS_PATH = Path(".")                           # caras
 
 # Parámetros del tablero 
 ROWS, COLS = 5, 5
