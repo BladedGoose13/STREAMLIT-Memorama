@@ -99,11 +99,11 @@ for row in range(rows):
         i = row * cols + col
         with columns[col]:
             if st.session_state.revealed[i] or st.session_state.locked[i]:
-                st.image(get_card_image(i), use_container_width=True)
+                st.image(get_card_image(i), use_column_width=True)
             else:
                 if st.button(" ", key=f"btn_{i}"):
                     handle_click(i)
-                st.image(back_image, use_container_width=True)
+                st.image(back_image, use_column_width=True)
 
 # ==== estado final ====
 if st.session_state.game_over:
