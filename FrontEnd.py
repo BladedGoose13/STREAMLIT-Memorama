@@ -126,5 +126,27 @@ def handle_click(cell_index: int):
 # Si hay ocultado pendiente y ya pasó el delay, ejecútalo (hace el UI más ágil)
 if st.session_state.pending_hide:
     i, j, t0 = st.session_state.pending_hide
-    if time.ti
+    if time.time() - t0 >= hide_delay_s:
+        st.session_state.revealed[i] = False
+        st.session_state.revealed[j] = False
+        st.session_state.pending_hide = None
+
+# ================== grilla ===============================
+columns = st.columns(cols)
+for r in range(rows):
+    for c in range(cols):
+        i = r * cols + c
+        with columns[c]:
+            if st.session_state.revealed[i] or st.session_state.locked[i]:
+                st.image(get_image_from_id(card_id_at(i)))
+            else:
+                if st.button(" ", key=f"btn_{i}"):
+                    handle_click(i)
+                st.image(back_image)
+
+# ================== estado final =========================
+if st.session_state.game_over:
+    st.error("💥 ¡joker! has perdido.")
+elif st.session_state.matches == num_pairs:
+    st.success(f"🏆 ¡ganaste en {st.session_state.moves} movimientos!")
 
