@@ -3,7 +3,7 @@ from PIL import Image
 from pathlib import Path
 from random import shuffle
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent
 IMAGE_PATH = ROOT / "Poker_Card.png"   # back image
 ASSETS_DIR = ROOT                      # faces in repo root
 
