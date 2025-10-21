@@ -6,10 +6,10 @@ from random import shuffle
 from PIL import Image
 import streamlit as st
 
-# === configuración de página (debe ir primero) ===
+# configuración de página (debe ir primero) 
 st.set_page_config(page_title="memorama con joker", page_icon="🃏", layout="wide")
 
-# === rutas ===
+# rutas 
 root_dir = Path(__file__).resolve().parent
 back_image_path = root_dir / "poker_card.png"
 joker_image_path = root_dir / "card_joker.jpg"
@@ -19,7 +19,7 @@ num_cards = rows * cols           # 25
 num_pairs = 12                    # 12 pares + 1 joker
 hide_delay_s = 0.35               # retardo para voltear (más bajo = más rápido)
 
-# === helpers ===
+#  helpers 
 def ensure_exists(path: Path, msg: str):
     if not path.exists():
         st.error(msg)
@@ -45,7 +45,7 @@ def load_faces():
         faces.append(load_image(f))
     return faces
 
-# === carga de imágenes ===
+# carga de imágenes 
 ensure_exists(back_image_path, f"falta {back_image_path.name}")
 ensure_exists(joker_image_path, f"falta {joker_image_path.name}")
 
@@ -58,7 +58,7 @@ deck_ids = list(range(num_pairs)) * 2 + [num_pairs]  # [0..11,0..11,12]
 def get_image_from_id(card_id: int) -> Image.Image:
     return joker_image if card_id == num_pairs else card_faces[card_id]
 
-# === estado del juego ===
+# estado del juego 
 st.title("🎴 memorama con joker")
 
 if "order" not in st.session_state:
@@ -87,7 +87,7 @@ st.sidebar.button("🔄 reiniciar", on_click=reset_game)
 st.sidebar.write(f"movimientos: {st.session_state.moves}")
 st.sidebar.write(f"pares: {st.session_state.matches}/{num_pairs}")
 
-# === lógica del juego ===
+# lógica del juego 
 def card_id_at(i: int) -> int:
     return deck_ids[st.session_state.order[i]]
 
@@ -136,7 +136,7 @@ if st.session_state.pending_hide:
         st.session_state.revealed[b] = False
         st.session_state.pending_hide = None
 
-# === grilla clickeable ===
+#  grilla clickeable 
 columns = st.columns(cols)
 
 for r in range(rows):
@@ -157,7 +157,7 @@ for r in range(rows):
 
 
 
-# === estado final ===
+#  estado final 
 if st.session_state.game_over:
     st.error("💥 has perdido.")
 elif st.session_state.matches == num_pairs:
