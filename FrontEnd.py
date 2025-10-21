@@ -3,6 +3,8 @@ from pathlib import Path
 from random import shuffle
 import streamlit as st
 from PIL import Image
+from st_clickable_images import clickable_images
+
 
 # --- set_page_config: DEBE ser la primera llamada de Streamlit ---
 st.set_page_config(page_title="memorama con joker", page_icon="🃏", layout="wide")
@@ -134,12 +136,16 @@ for r in range(rows):
     for c in range(cols):
         i = r * cols + c
         with columns[c]:
-            if st.session_state.revealed[i] or st.session_state.locked[i]:
-                st.image(get_image_from_id(card_id_at(i)))
-            else:
-                if st.button(" ", key=f"btn_{i}"):
-                    handle_click(i)
-                st.image(back_image)
+            img = get_image_from_id(card_id_at(i)) if (st.session_state.revealed[i] or st.session_state.locked[i]) else back_image
+            clicked = clickable_images(
+                [pil_to_data_uri(img)],  # una sola imagen por celda
+                titles=[""],
+                div_style={"display": "flex", "justify-content": "center"},
+                img_style={"height": "180px", "margin": "0"}
+            )
+            # clicked es [0] si se hizo click, [] si no
+            if clicked and clicked[0] == 0:
+                handle_click(i)
 
 # ================== estado final ==================
 if st.session_state.game_over:
