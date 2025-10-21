@@ -1,15 +1,15 @@
+import io
+import base64
 import time
 from pathlib import Path
 from random import shuffle
-import streamlit as st
 from PIL import Image
-from st_clickable_images import clickable_images
+import streamlit as st
 
-
-# --- set_page_config: DEBE ser la primera llamada de Streamlit ---
+# === configuración de página (debe ir primero) ===
 st.set_page_config(page_title="memorama con joker", page_icon="🃏", layout="wide")
 
-# ================== configuración ==================
+# === rutas ===
 root_dir = Path(__file__).resolve().parent
 back_image_path = root_dir / "poker_card.png"
 joker_image_path = root_dir / "card_joker.jpg"
@@ -17,17 +17,24 @@ joker_image_path = root_dir / "card_joker.jpg"
 rows, cols = 5, 5
 num_cards = rows * cols           # 25
 num_pairs = 12                    # 12 pares + 1 joker
-hide_delay_s = 0.35               # retardo para voltear
+hide_delay_s = 0.35               # retardo para voltear (más bajo = más rápido)
 
-# ================== utilidades y caché ==================
-def ensure_exists(p: Path, msg: str):
-    if not p.exists():
+# === helpers ===
+def ensure_exists(path: Path, msg: str):
+    if not path.exists():
         st.error(msg)
         st.stop()
 
+def pil_to_data_uri(img: Image.Image) -> str:
+    """Convierte una imagen PIL a formato base64 para mostrarla en HTML."""
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    return f"data:image/png;base64,{b64}"
+
 @st.cache_resource
-def load_image(p: Path):
-    return Image.open(p).convert("RGBA")
+def load_image(path: Path) -> Image.Image:
+    return Image.open(path).convert("RGBA")
 
 @st.cache_resource
 def load_faces():
@@ -38,7 +45,7 @@ def load_faces():
         faces.append(load_image(f))
     return faces
 
-# ================== carga de assets ==================
+# === carga de imágenes ===
 ensure_exists(back_image_path, f"falta {back_image_path.name}")
 ensure_exists(joker_image_path, f"falta {joker_image_path.name}")
 
@@ -46,13 +53,12 @@ back_image = load_image(back_image_path)
 joker_image = load_image(joker_image_path)
 card_faces = load_faces()
 
-# baraja por IDs (0..11 pares, 12 joker)
-deck_ids = list(range(num_pairs)) * 2 + [num_pairs]
+deck_ids = list(range(num_pairs)) * 2 + [num_pairs]  # [0..11,0..11,12]
 
 def get_image_from_id(card_id: int) -> Image.Image:
     return joker_image if card_id == num_pairs else card_faces[card_id]
 
-# ================== estado ==================
+# === estado del juego ===
 st.title("🎴 memorama con joker")
 
 if "order" not in st.session_state:
@@ -81,7 +87,7 @@ st.sidebar.button("🔄 reiniciar", on_click=reset_game)
 st.sidebar.write(f"movimientos: {st.session_state.moves}")
 st.sidebar.write(f"pares: {st.session_state.matches}/{num_pairs}")
 
-# ================== lógica ==================
+# === lógica del juego ===
 def card_id_at(i: int) -> int:
     return deck_ids[st.session_state.order[i]]
 
@@ -92,7 +98,7 @@ def handle_click(i: int):
     if st.session_state.game_over or st.session_state.locked[i] or st.session_state.revealed[i]:
         return
 
-    # si hay ocultado pendiente y ya pasó el delay, ocúltalo antes
+    # Ocultar las que estaban esperando
     if st.session_state.pending_hide:
         a, b, t0 = st.session_state.pending_hide
         if time.time() - t0 >= hide_delay_s:
@@ -122,7 +128,7 @@ def handle_click(i: int):
         st.session_state.pending_hide = (i, last, time.time())
         st.session_state.last_clicked = None
 
-# ejecuta ocultados pendientes si ya venció el delay
+# Oculta si ya pasó el retardo
 if st.session_state.pending_hide:
     a, b, t0 = st.session_state.pending_hide
     if time.time() - t0 >= hide_delay_s:
@@ -130,25 +136,37 @@ if st.session_state.pending_hide:
         st.session_state.revealed[b] = False
         st.session_state.pending_hide = None
 
-# ================== grilla ==================
+# === grilla clickeable ===
 columns = st.columns(cols)
 for r in range(rows):
     for c in range(cols):
         i = r * cols + c
         with columns[c]:
-            img = get_image_from_id(card_id_at(i)) if (st.session_state.revealed[i] or st.session_state.locked[i]) else back_image
-            clicked = clickable_images(
-                [pil_to_data_uri(img)],  # una sola imagen por celda
-                titles=[""],
-                div_style={"display": "flex", "justify-content": "center"},
-                img_style={"height": "180px", "margin": "0"}
+            img = (
+                get_image_from_id(card_id_at(i))
+                if (st.session_state.revealed[i] or st.session_state.locked[i])
+                else back_image
             )
-            # clicked es [0] si se hizo click, [] si no
-            if clicked and clicked[0] == 0:
+            data_uri = pil_to_data_uri(img)
+            button_css = f"""
+            <style>
+            .cardbtn{i} > button {{
+                width: 100%;
+                height: 180px;
+                background-image: url('{data_uri}');
+                background-size: cover;
+                background-position: center;
+                border: none;
+                padding: 0;
+            }}
+            </style>
+            """
+            st.markdown(button_css, unsafe_allow_html=True)
+            if st.button(" ", key=f"btn_{i}", use_container_width=True):
                 handle_click(i)
 
-# ================== estado final ==================
+# === estado final ===
 if st.session_state.game_over:
-    st.error("💥 ¡joker! has perdido.")
+    st.error("💥 has perdido.")
 elif st.session_state.matches == num_pairs:
     st.success(f"🏆 ¡ganaste en {st.session_state.moves} movimientos!")
