@@ -139,51 +139,22 @@ if st.session_state.pending_hide:
 # === grilla clickeable ===
 columns = st.columns(cols)
 
-def pil_to_data_uri(img):
-    import io, base64
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    b64 = base64.b64encode(buf.getvalue()).decode()
-    return f"data:image/png;base64,{b64}"
-
 for r in range(rows):
     for c in range(cols):
         i = r * cols + c
         with columns[c]:
-            # elige cara o reverso
+            # botón grande y ancho: al hacer clic, volteamos
+            if st.button(" ", key=f"btn_{i}", use_container_width=True):
+                handle_click(i)
+
+            # mostramos la imagen real (cara o reverso)
             img = (
                 get_image_from_id(card_id_at(i))
                 if (st.session_state.revealed[i] or st.session_state.locked[i])
                 else back_image
             )
-            data_uri = pil_to_data_uri(img)
+            st.image(img, use_column_width=True)  # usa la imagen real, no background
 
-            # estilos para el botón-carta
-            st.markdown(
-                f"""
-                <style>
-                .cardbtn{i} > button {{
-                    width: 100%;
-                    height: 180px;         /* ajusta tamaño aquí */
-                    background-image: url('{data_uri}');
-                    background-size: cover;
-                    background-position: center;
-                    border: none;
-                    padding: 0;
-                    box-shadow: 0 0 0 1px rgba(255,255,255,.1) inset;
-                }}
-                </style>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            # envoltorio con la clase que aplica el CSS al botón
-            st.markdown(f'<div class="cardbtn{i}">', unsafe_allow_html=True)
-            clicked = st.button(" ", key=f"btn_{i}", use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            if clicked:
-                handle_click(i)
 
 
 # === estado final ===
