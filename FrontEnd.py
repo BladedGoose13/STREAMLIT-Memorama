@@ -1,7 +1,6 @@
 import time
 from pathlib import Path
 from random import shuffle
-
 import streamlit as st
 from PIL import Image
 
