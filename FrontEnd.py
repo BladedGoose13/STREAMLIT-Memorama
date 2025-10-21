@@ -7,8 +7,16 @@ ROOT = Path(__file__).resolve().parent
 IMAGE_PATH = ROOT / "Poker_Card.png"   # back image
 ASSETS_DIR = ROOT                      # faces in repo root
 
-candidates = [p for p in ASSETS_DIR.glob("card_*.jpg") if "copy" not in p.name.lower()]
-candidates.sort(key=lambda p: int(__import__("re").search(r"(\d+)", p.stem).group(1)))
+card_regex = re.compile(r'^card_(\d+)\.(jpg|jpeg|png)$', re.IGNORECASE)
+
+candidates = []
+for p in ASSETS_DIR.iterdir():
+    m = card_regex.match(p.name)
+    if m:
+        candidates.append((int(m.group(1)), p))
+
+# ordena por el número de la carta
+candidates.sort(key=lambda t: t[0])
 
 FACES = [Image.open(p).convert("RGBA") for p in candidates]
 
