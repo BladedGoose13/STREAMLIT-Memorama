@@ -3,11 +3,16 @@ from PIL import Image
 from pathlib import Path
 from random import shuffle
 
-# Rutas 
-IMAGE_PATH = Path("Poker_Card.png")           # reverso
-CARDS_PATH = Path(".")                           # caras
+ROOT = Path(__file__).resolve().parents[1]
+IMAGE_PATH = ROOT / "Poker_Card.png"   # back image
+ASSETS_DIR = ROOT                      # faces in repo root
 
-# Parámetros del tablero 
+candidates = [p for p in ASSETS_DIR.glob("card_*.jpg") if "copy" not in p.name.lower()]
+candidates.sort(key=lambda p: int(__import__("re").search(r"(\d+)", p.stem).group(1)))
+
+FACES = [Image.open(p).convert("RGBA") for p in candidates]
+
+# Parámetros del tablero
 ROWS, COLS = 5, 5
 N = ROWS * COLS                 # 25
 MAX_PAIRS = 12                  # 12 pares + 1 Joker = 25
@@ -24,13 +29,13 @@ BACK_RGBA = Image.open(IMAGE_PATH).convert("RGBA")
 # Carga caras (12 valores + 1 Joker)
 faces = []
 for i in range(MAX_PAIRS):
-    p = CARDS_PATH / f"card_{i}.jpg"
+    p = ASSETS_DIR / f"card_{i}.jpg"
     if not p.exists():
         st.error(f"Falta la carta: {p}. Debes tener card_0.jpg ... card_{MAX_PAIRS-1}.jpg")
         st.stop()
     faces.append(Image.open(p).convert("RGBA"))
 
-joker_path = CARDS_PATH / "card_joker.jpg"
+joker_path = ASSETS_DIR / "card_joker.jpg"
 if not joker_path.exists():
     st.error(f"Falta el Joker: {joker_path}")
     st.stop()
@@ -146,7 +151,7 @@ for r in range(ROWS):
 
 
 if st.session_state.lost:
-    st.error("JAJA PENDEJO.")
+    st.error("Perdiste por revelar el Joker.")
     st.stop()
 
 # Si hay un fallo pendiente de ocultar 
