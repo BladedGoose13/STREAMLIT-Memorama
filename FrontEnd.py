@@ -15,7 +15,7 @@ FACES = [Image.open(p).convert("RGBA") for p in candidates]
 # Parámetros del tablero
 ROWS, COLS = 5, 5
 N = ROWS * COLS                 # 25
-MAX_PAIRS = 12                  # 12 pares + 1 Joker = 25
+MAX_PAIRS = 11                  # 12 pares + 1 Joker = 25
 
 st.title("🎴 Memorama con Joker")
 
