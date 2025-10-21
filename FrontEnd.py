@@ -3,12 +3,12 @@ from PIL import Image
 from pathlib import Path
 from random import shuffle
 
-# rutas 
+# ==== rutas ====
 root_dir = Path(__file__).resolve().parent
 back_image_path = root_dir / "poker_card.png"
-joker_image_path = root_dir / "joker_card.jpg"
+joker_image_path = root_dir / "card_joker.jpg"
 
-# carga de imágenes 
+# ==== carga de imágenes ====
 def ensure_exists(path: Path, message: str):
     if not path.exists():
         st.error(message)
@@ -20,14 +20,14 @@ ensure_exists(joker_image_path, f"falta {joker_image_path.name}")
 back_image = Image.open(back_image_path).convert("RGBA")
 joker_image = Image.open(joker_image_path).convert("RGBA")
 
-# 12 cartas numeradas
+# 12 cartas numeradas: card_0.jpg ... card_11.jpg
 card_faces = []
 for i in range(12):
     card_path = root_dir / f"card_{i}.jpg"
     ensure_exists(card_path, f"falta {card_path.name}")
     card_faces.append(Image.open(card_path).convert("RGBA"))
 
-# parámetros del juego 
+# ==== parámetros del juego ====
 rows, cols = 5, 5
 num_cards = rows * cols  # 25
 deck = card_faces + card_faces + [joker_image]
@@ -60,7 +60,7 @@ st.sidebar.button("🔄 reiniciar", on_click=reset_game)
 st.sidebar.write(f"movimientos: {st.session_state.moves}")
 st.sidebar.write(f"pares: {st.session_state.matches}/12")
 
-# lógica del juego
+# ==== lógica del juego ====
 def get_card_image(index):
     return deck[st.session_state.card_order[index]]
 
@@ -92,7 +92,7 @@ def handle_click(index):
         st.session_state.revealed[last] = False
     st.session_state.last_clicked = None
 
-# interfaz gráfica
+# ==== interfaz gráfica ====
 columns = st.columns(cols)
 for row in range(rows):
     for col in range(cols):
@@ -105,8 +105,9 @@ for row in range(rows):
                     handle_click(i)
                 st.image(back_image, use_container_width=True)
 
-# estado final 
+# ==== estado final ====
 if st.session_state.game_over:
-    st.error("💥 joker")
+    st.error("💥 ¡card_joker! has perdido.")
 elif st.session_state.matches == 12:
     st.success(f"🏆 ¡ganaste en {st.session_state.moves} movimientos!")
+
