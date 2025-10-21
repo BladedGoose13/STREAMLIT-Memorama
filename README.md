@@ -3,6 +3,9 @@
 # STREAMLIT-Memorama
 A card-based memory and pattern recognition game built with Streamlit. Players must identify and memorize visual patterns hidden behind interactive cards, improving focus and cognitive agility.
 
+<img src="Memorama.png" alt="foto_1" width="600">
+<img src="Joker_foto.png" alt="foto_2" width="600">
+
 **AI was used for GitHub's documentation and path-related technical functions**
 
 ## ⚡ Installation
