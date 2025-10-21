@@ -8,5 +8,6 @@ A card-based memory and pattern recognition game built with Streamlit. Players m
 ## ⚡ Installation
 ```bash
 git clone https://github.com/BladedGoose13/STREAMLIT-Memorama.git
+pip install st-clickable-images
 cd STREAMLIT-Memorama
 streamlit run frontend.py
